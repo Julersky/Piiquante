@@ -8,7 +8,9 @@ const app = express();
 
 const cors = require('cors');
 
-const user = require('./models/users');
+const userRoutes = require('./routes/users')
+
+// const saucesRoutes = require('./routes/sauces');
 
 mongoose.connect('mongodb+srv://Julersky:MongoDB1993@cluster0.0wy37de.mongodb.net/?retryWrites=true&w=majority',
   { useNewUrlParser: true,
@@ -16,7 +18,7 @@ mongoose.connect('mongodb+srv://Julersky:MongoDB1993@cluster0.0wy37de.mongodb.ne
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
 
-module.exports = app; // On va exporter notre variable app pour qu'elle soit utilisable sur tout les autres fichiers
+
 
 
 
@@ -27,6 +29,8 @@ app.use(express.json());  // Middleware qui permet de recuperer toute les requet
 
 app.use(cors());
 
+
+
 app.use((req, res, next) => {// CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
@@ -34,29 +38,18 @@ app.use((req, res, next) => {// CORS
     next();
 });
 
-
-
-
-
-//Routes POST
-
-app.post("/api/auth/signup",(req, res, next) => {//Recuperer les informations du client
-  const newUser = new user({
-    ...req.body// Les ... sont l'operateur spread qui permet de copier le corps de la requete 
-  });
-  newUser.save()//enregistre l'objet dans la base et retourne un promise
-    .then(() => res.status(201).json({message : 'User enregistré'}))
-    .catch(() => res.status(400).json({error}))
-}); 
-
-app.post("/api/auth/login")
 app.post("/api/sauces")
 app.post("/api/sauces/:id/like")
 
-//Routes GET
-app.get("/api/sauces")
-app.get("/api/sauces/:id")
+//Routes GET(read)
+app.get("/api/sauces")//find
+app.get("/api/sauces/:id")//findOne (avec params.id)
 
 
-  
+//Routes PUT(update)
+
+app.use('/api/auth', userRoutes);
+// app.use('/api/sauces', saucesRoutes);
+
+module.exports = app; // On va exporter notre variable app pour qu'elle soit utilisable sur tout les autres fichiers
 
