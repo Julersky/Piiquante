@@ -1,16 +1,17 @@
 const mongoose = require('mongoose');
 mongoose.set('strictQuery', true);
 
-
-const express = require('express');// le mot require permet d'inclure un module node (ici http )
+const express = require('express');// le mot require permet d'inclure un module node
 
 const app = express();
+
+const path = require('path');
 
 const cors = require('cors');
 
 const userRoutes = require('./routes/users')
 
-// const saucesRoutes = require('./routes/sauces');
+const saucesRoutes = require('./routes/sauces');
 
 mongoose.connect('mongodb+srv://Julersky:MongoDB1993@cluster0.0wy37de.mongodb.net/?retryWrites=true&w=majority',
   { useNewUrlParser: true,
@@ -38,18 +39,14 @@ app.use((req, res, next) => {// CORS
     next();
 });
 
-app.post("/api/sauces")
-app.post("/api/sauces/:id/like")
-
-//Routes GET(read)
-app.get("/api/sauces")//find
-app.get("/api/sauces/:id")//findOne (avec params.id)
 
 
-//Routes PUT(update)
+
+//Routes
 
 app.use('/api/auth', userRoutes);
-// app.use('/api/sauces', saucesRoutes);
+app.use('/api/sauces', saucesRoutes);
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 module.exports = app; // On va exporter notre variable app pour qu'elle soit utilisable sur tout les autres fichiers
 

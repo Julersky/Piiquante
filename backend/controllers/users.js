@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-
+const jwt = require('jsonwebtoken')
 const User = require('../models/user');
 
 
@@ -30,7 +30,11 @@ exports.userLogin = (req, res, next) => {
             }else{
               res.status(200).json({
                   userId: user._id,
-                  token: 'TOKEN'
+                  token: jwt.sign(//3 arguments 1 les données que l'on veut encoder(payload) 2 la clé secrete pour l'encodage 3 configuration d'expiration du Token
+                    {userId: user._id},
+                    'RANDOM_TOKEN_SECRET',
+                    {expiresIn: '24h'}
+                  )
               })
             }
           })
