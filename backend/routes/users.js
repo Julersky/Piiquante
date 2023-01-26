@@ -1,9 +1,9 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const userCtrl = require('../controllers/users');
+const userCtrl = require("../controllers/users");
 
 // Middleware
-const signupMiddleware = require('../middleware/user/signup');
+const signupMiddleware = require("../middleware/user/signup");
 
 //Routes POST(create)
 
