@@ -72,44 +72,94 @@ exports.deleteSauce = (req, res, next) => {
 }
 
 exports.likeSauce = (req, res, next) => {
-  console.log(req.body)
-  const sauceObject = req.body;
-  const objectLikes = sauceObject.like;
+  const objectLikes = req.body.like;
+  const objectUser = req.body.userId
+  console.log("like de la requete",objectLikes,typeof(req.body.like));
+  console.log(req.params.id)
   Sauces.findOne({ _id: req.params.id })
-    .then((sauce) => {
-      console.log(sauce)
-      const userLiked = sauce.usersLiked;
-      const userdisliked = sauce.usersDisliked;
-      let oolike = sauce.likes;
-      const dislike = sauce.dislikes;
-      if (objectLikes === 1) {
-        console.log('trouvé')
-        sauce.usersLiked.push(sauceObject.userId);
-        console.log("nouveau user liked", userLiked)
-        sauce.likes++
-        oolike++//Faut-il verifier que l'id est dans l'array??
-        console.log("nouveau like", oolike)
-        console.log("sauce like", sauce.likes)
-        console.log(sauce)
-        Sauces.updateOne({ _id: req.params.id }, { sauce, _id: req.params.id })
-          .then(() => {
-            console.log("nouvelle sauce mise a jour", sauce)
-            res.status(200).json({ message: 'Sauce modifiée!' })
+  .then((sauce) => {
+    console.log(sauce)
+    if (objectLikes === -1) {
+      if (!sauce.usersDisliked.includes(objectUser)) {
 
-          })
-          .catch((error) => {
-            console.log(error);
-            res.status(400).json({ error });
-          })
-
+        Sauces.updateOne({ _id: req.params.id},
+            {
+                $push: {usersDisliked: req.body.userId},
+                $inc: {dislikes: 1},
+            }).then(() => {
+    
+            res.status(200).json({message: "Dislike ajouté avec succès."});
+    
+        }).catch((error) => {
+    
+            res.status(400).json({message: "Une erreur inattendue s'est produite lors de l'ajout du dislike sur la sauce. Veuillez réessayé."});
+    
+        });
+    
+      } else {
+    
+        res.status(404).json({"message": "Désolé vous avez déjà mit un dislike sur cette sauce."});
+    
       }
-      if (objectLikes === -1) {
+    }
+    if (objectLikes === 1){
+      if (!sauce.usersLiked.includes(objectUser)) {
 
+        Sauces.updateOne({ _id: req.params.id},
+            {
+                $push: {usersLiked: req.body.userId},
+                $inc: {likes: 1},
+            }).then(() => {
+    
+            res.status(200).json({message: "Like ajouté avec succès."});
+    
+        }).catch((error) => {
+    
+            res.status(400).json({message: "Une erreur inattendue s'est produite lors de l'ajout du like sur la sauce. Veuillez réessayé."});
+    
+        });
+    
+    } else {
+    
+        res.status(404).json({"message": "Désolé vous avez déjà mit un like sur cette sauce."});
+    
+    }
+
+    }
+
+    if (objectLikes === 0){
+      if (sauce.usersLiked.includes(objectUser)){
+        Sauces.updateOne({ _id: req.params.id},
+          {
+              $pull: {usersLiked: {$in : [req.body.userId]}},
+              $inc: {likes: -1},
+          }).then(() => {
+  
+          res.status(200).json({message: "Like supprimé avec succès."});
+  
+      }).catch((error) => {
+  
+          res.status(400).json({message: "Une erreur inattendue s'est produite lors de la suppression du like sur la sauce. Veuillez réessayé."});
+  
+      });
+      }else if (sauce.usersDisliked.includes(objectUser)){
+        Sauces.updateOne({ _id: req.params.id},
+          {
+              $pull: {usersDisliked: {$in : [req.body.userId]}},
+              $inc: {dislikes: -1},
+          }).then(() => {
+  
+          res.status(200).json({message: "Dislike supprimé avec succès."});
+  
+      }).catch((error) => {
+  
+          res.status(400).json({message: "Une erreur inattendue s'est produite lors de la suppression du dislike sur la sauce. Veuillez réessayé."});
+  
+      });
       }
-      if (objectLikes === 0) {
+    }
 
-      }
-    })
-    .catch((error) => { res.status(500).json({ error }) })
+  })
+  .catch((error) => { res.status(500).json({ error:"Sauce non trouvée" }) })
 
-};
+}
